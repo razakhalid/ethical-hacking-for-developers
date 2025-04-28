@@ -67,7 +67,7 @@ describe('Security Tests - Broken Access Control', () => {
       // If we get an error, the access control is working
       expect(error.response?.status).toBe(400);
     }
-    expect(status).toBe(200);
-    expect(privateNote).toBeDefined();
+    expect(status).toBe(400);
+    expect(privateNote).toBeFalsy();
   });
 }); 
