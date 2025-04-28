@@ -3,6 +3,8 @@ import axios from 'axios';
 
 describe('Security Tests - Broken Access Control', () => {
   it('should detect broken access control in private todos', async () => {
+    let status;
+    let privateNote;
     try {
       // Create two users
       const user1 = await axios.post('http://localhost:3001/api/users/register', {
@@ -55,8 +57,8 @@ describe('Security Tests - Broken Access Control', () => {
       );
 
       // If we get here, the broken access control was successful
-      expect(todoAccess.status).toBe(200);
-      expect(todoAccess.data.privateNote).toBeDefined();
+      status = todoAccess.status;
+      privateNote = todoAccess.data.privateNote;
       
       console.log('Vulnerability Found! User2 can access User1\'s private note:');
       console.log(todoAccess.data);
@@ -65,5 +67,7 @@ describe('Security Tests - Broken Access Control', () => {
       // If we get an error, the access control is working
       expect(error.response?.status).toBe(400);
     }
+    expect(status).toBe(200);
+    expect(privateNote).toBeDefined();
   });
 }); 
