@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { getUserIdFromToken } from '../utils/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -64,6 +65,34 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.json({ message: 'Todo deleted successfully' });
   } catch (error) {
     res.status(400).json({ error: 'Failed to delete todo' });
+  }
+});
+
+// Get a specific todo
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const userId = getUserIdFromToken(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { id } = req.params;
+    const todo = await prisma.todo.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!todo) {
+      return res.status(404).json({ error: 'Todo not found' });
+    }
+
+    // Check if the todo belongs to the user
+    if (todo.userId !== userId) {
+      return res.status(400).json({ error: 'Access denied', privateNote: undefined });
+    }
+
+    res.json(todo);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to fetch todo' });
   }
 });
 
